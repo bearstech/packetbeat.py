@@ -1,5 +1,24 @@
 import json
 
+from beat import Event, EventsHose
+
+
+class EventHttp(Event):
+    @property
+    def http(self):
+        if self.raw['http'] is None:
+            return None
+        return Http(self.raw)
+
+
+class EventsHoseHttp(EventsHose):
+    event = EventHttp
+
+    def __iter__(self):
+        for event in super(EventsHoseHttp, self).__iter__():
+            if event.raw['http'] is not None:
+                yield event
+
 
 def parse_headers(raw):
     d = {}
@@ -29,6 +48,7 @@ class HttpRequest(object):
         else:
             self.arguments = None
         self.path = s[0]
+        self.slug = [a for a in self.path.split('/') if a != '']
         self.header, self.body = self.raw.split('\r\n\r\n', 1)
         self.header = parse_headers(self.header)
 
@@ -71,3 +91,13 @@ class HttpResponse(object):
         if self._json is None:
             self._json = json.loads(self.body)
         return self._json
+
+
+if __name__ == '__main__':
+    import sys
+    import redis
+
+    r = redis.StrictRedis(host=sys.argv[1], port=6379, db=0)
+    hose = EventsHoseHttp(r)
+    for event in hose:
+        print event

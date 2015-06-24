@@ -1,7 +1,6 @@
 import json
 import time
 
-from http import Http
 
 class Event(object):
     def __init__(self, raw):
@@ -11,14 +10,9 @@ class Event(object):
         self.src_ip = raw['src_ip']
         self.agent = raw['agent']
 
-    @property
-    def http(self):
-        if self.raw['http'] is None:
-            return None
-        return Http(self.raw)
-
 
 class EventsHose(object):
+    event = Event
     "Source of events"
     def __init__(self, redis_connection, chan='packetbeat/*'):
         self.r = redis_connection
@@ -35,15 +29,4 @@ class EventsHose(object):
                 continue
             if msg['type'] in {'message', 'pmessage'}:
                 packet = json.loads(msg['data'])
-                yield Event(packet)
-
-
-if __name__ == '__main__':
-    import sys
-    import redis
-
-    r = redis.StrictRedis(host=sys.argv[1], port=6379, db=0)
-    hose = EventsHose(r)
-    for event in hose:
-        print event
-
+                yield self.event(packet)
