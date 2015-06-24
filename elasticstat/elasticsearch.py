@@ -1,3 +1,5 @@
+import json
+
 from http import EventHttp, EventsHoseHttp
 
 
@@ -22,6 +24,18 @@ class EventElasticsearch(EventHttp):
         return 'index'
 
 
+def bulk(event):
+    action = None
+    for line in event.http.request.body.split('\n')[:-1]:
+        if action is None:
+            action = json.loads(line).items()[0]
+            if action[0] not in {'index', 'create'}:
+                yield action
+                action = None
+        else:
+            yield action[0], action[1], line
+            action = None
+
 class EventsHoseElasticsearch(EventsHoseHttp):
     event = EventElasticsearch
 
@@ -34,3 +48,6 @@ if __name__ == '__main__':
     hose = EventsHoseElasticsearch(r)
     for event in hose:
         print event.api, event.http.request.method, event.http.request.path
+        if event.api == 'bulk':
+            for action in bulk(event):
+                print "\t", action
