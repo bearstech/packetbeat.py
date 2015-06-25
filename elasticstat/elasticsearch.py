@@ -24,7 +24,7 @@ class EventElasticsearch(EventHttp):
         return 'index'
 
 
-def bulk(event):
+def bulk_request(event):
     action = None
     for line in event.http.request.body.split('\n')[:-1]:
         if action is None:
@@ -49,5 +49,7 @@ if __name__ == '__main__':
     for event in hose:
         print event.api, event.http.request.method, event.http.request.path
         if event.api == 'bulk':
-            for action in bulk(event):
+            for action in bulk_request(event):
                 print "\t", action
+
+            print "\t", event.http.response.json
