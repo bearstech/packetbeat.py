@@ -2,6 +2,10 @@ import json
 
 from beat import Event, EventsHose
 
+"""
+Packetbeat events are HTTP.
+"""
+
 
 class EventHttp(Event):
     @property

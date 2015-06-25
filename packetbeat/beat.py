@@ -1,6 +1,10 @@
 import json
 import time
 
+"""
+Raw packetbeat client.
+"""
+
 
 class Event(object):
     def __init__(self, raw):

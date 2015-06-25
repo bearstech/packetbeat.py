@@ -2,6 +2,9 @@ import json
 
 from http import EventHttp, EventsHoseHttp
 
+"""
+Packetbeat events are Elasticsearch actions.
+"""
 
 class EventElasticsearch(EventHttp):
 
