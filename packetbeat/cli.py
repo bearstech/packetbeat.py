@@ -51,7 +51,7 @@ def watch(ctx, channel):
                           db=ctx.obj['DB'])
     hose = EventsHoseElasticsearch(r, channel)
     for event in hose:
-        print(event.api, event.http.request.method, event.http.request.path)
+        print(u"%s %s %s" % (event.api, event.http.request.method, event.http.request.path))
 
 if __name__ == '__main__':
     packetbeat(obj={})
