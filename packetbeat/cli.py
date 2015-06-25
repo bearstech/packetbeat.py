@@ -7,6 +7,12 @@ import redis
 from elasticsearch import EventsHoseElasticsearch
 
 
+def redis_factory(ctx):
+    return redis.StrictRedis(host=ctx.obj['HOST'],
+                             port=ctx.obj['PORT'],
+                             db=ctx.obj['DB'])
+
+
 @click.group()
 @click.option('--host', default='localhost', help='Redis host.')
 @click.option('--port', default=6379, help='Redis port.')
@@ -17,12 +23,11 @@ def packetbeat(ctx, host, port, db):
     ctx.obj['PORT'] = port
     ctx.obj['DB'] = db
 
+
 @packetbeat.command(help="Guess used channels.")
 @click.pass_context
 def channels(ctx):
-    r = redis.StrictRedis(host=ctx.obj['HOST'], port=ctx.obj['PORT'],
-                          db=ctx.obj['DB'])
-    pubsub = r.pubsub()
+    pubsub = redis_factory(ctx).pubsub()
     pubsub.psubscribe('packetbeat/*')
     channels = set()
     print("Guessing used channels, hit ctrl-C to stop.")
@@ -41,17 +46,14 @@ def channels(ctx):
         pass
 
 
-
 @packetbeat.command(help="Watch events on a channel.")
 @click.option('--channel', default='packetbeat/*', help="Pick a channel, or a pattern.")
 @click.pass_context
 def watch(ctx, channel):
-    r = redis.StrictRedis(host=ctx.obj['HOST'],
-                          port=ctx.obj['PORT'],
-                          db=ctx.obj['DB'])
-    hose = EventsHoseElasticsearch(r, channel)
+    hose = EventsHoseElasticsearch(redis_factory(ctx), channel)
     for event in hose:
-        print(u"%s %s %s" % (event.api, event.http.request.method, event.http.request.path))
+        print(u"%s %s %s" % (event.api, event.http.request.method,
+                             event.http.request.path))
 
 if __name__ == '__main__':
     packetbeat(obj={})
