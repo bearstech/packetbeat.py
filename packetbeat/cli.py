@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+import time
+
 import click
 import redis
 
@@ -18,10 +20,27 @@ def packetbeat(ctx, host, port, db):
 @packetbeat.command()
 @click.pass_context
 def channels(ctx):
-    r = redis.StrictRedis(host=ctx.obj['HOST'],
-                          port=ctx.obj['PORT'],
+    r = redis.StrictRedis(host=ctx.obj['HOST'], port=ctx.obj['PORT'],
                           db=ctx.obj['DB'])
-    print r.keys('packetbeat/*')
+    pubsub = r.pubsub()
+    pubsub.psubscribe('packetbeat/*')
+    channels = set()
+    print("Guessing used channels, hit ctrl-C to stop.")
+    try:
+        while True:
+            msg = pubsub.get_message()
+            if msg is None:
+                time.sleep(0.1)
+                continue
+            if msg['type'] in {'message', 'pmessage'}:
+                channel = msg['channel']
+                if channel not in channels:
+                    print(channel)
+                    channels.add(channel)
+    except KeyboardInterrupt:
+        pass
+
+
 
 @packetbeat.command()
 @click.option('--channel', default='packetbeat/*')
