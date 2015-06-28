@@ -1,5 +1,10 @@
 import json
 
+try:
+    from http_parser.parser import HttpParser
+except ImportError:
+    from http_parser.pyparser import HttpParser
+
 from beat import Event, EventsHose
 
 """
@@ -9,10 +14,10 @@ Packetbeat events are HTTP.
 
 class EventHttp(Event):
     @property
-    def http(self):
-        if self.raw['http'] is None:
+    def transaction(self):
+        if self.type != 'http':
             return None
-        return Http(self.raw)
+        return Http(self)
 
 
 class EventsHoseHttp(EventsHose):
@@ -20,75 +25,52 @@ class EventsHoseHttp(EventsHose):
 
     def __iter__(self):
         for event in super(EventsHoseHttp, self).__iter__():
-            if event.raw['http'] is not None:
+            if event.type == 'http':
                 yield event
-
-
-def parse_headers(raw):
-    d = {}
-    for line in raw.split('\r\n')[1:]:
-        k, v = line.split(': ', 1)
-        d[k.lower()] = v
-    return d
 
 
 class Http(object):
     def __init__(self, raw):
         self.raw = raw
-        self.request = HttpRequest(self.raw['http'], self.raw['request_raw'])
-        self.response = HttpResponse(self.raw['http'], self.raw['response_raw'])
+        self.request = HttpRequest(raw)
+        self.response = HttpResponse(raw)
+
+    def __repr__(self):
+        return "<Http %s %s>" % (repr(self.request), repr(self.response))
 
 
 class HttpRequest(object):
-    def __init__(self, http, raw):
+    def __init__(self, raw):
         self.raw = raw
-        self.host = http['host']
-        self.uri = http['request']['uri']
-        self.method = http['request']['method']
-        s = self.uri.split('?')
-        self.path = s[0]
-        if len(s) > 1:
-            self.arguments = s[1]
-        else:
-            self.arguments = None
-        self.path = s[0]
+        req = HttpParser()
+        req.execute(raw.request, len(raw.request))
+        self.headers = req.get_headers()
+        self.body = "".join(req._body)
+        self.url = req.get_url()
+        self.path = req.get_path()
+        self.method = req.get_method()
+        self.arguments = req.get_query_string()
         self.slug = [a for a in self.path.split('/') if a != '']
-        self.header, self.body = self.raw.split('\r\n\r\n', 1)
-        self.header = parse_headers(self.header)
+
+    def __repr__(self):
+        return u"<Request %s %s>" % (self.method, self.url)
 
     @property
     def json(self):
         return json.loads(self.body)
 
-    def __len__(self):
-        return len(self.raw)
-
 
 class HttpResponse(object):
-    def __init__(self, http, raw):
+    def __init__(self, raw):
+        resp = HttpParser()
+        resp.execute(raw.response, len(raw.response))
+        self.headers = resp.get_headers()
+        self.body = "".join(resp._body)
         self.raw = raw
-        self.code = http['response']['code']
-        self._header = None
-        self._body = None
-        self._json = None
+        self.code = resp.get_status_code()
 
-    def _parse(self):
-        self._header, self._body = self.raw.split('\r\n\r\n', 1)
-
-    def __len__(self):
-        return len(self.raw)
-
-    @property
-    def body(self):
-        if self._body is None:
-            self._parse()
-        return self._body
-
-    @property
-    def header(self):
-        if self._header is None:
-            self._parse()
-        return self._header
+    def __repr__(self):
+        return u"<Response %i>" % self.code
 
     @property
     def json(self):
@@ -104,4 +86,4 @@ if __name__ == '__main__':
     r = redis.StrictRedis(host=sys.argv[1], port=6379, db=0)
     hose = EventsHoseHttp(r)
     for event in hose:
-        print event
+        print event.transaction
