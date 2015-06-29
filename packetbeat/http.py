@@ -13,11 +13,15 @@ Packetbeat events are HTTP.
 
 
 class EventHttp(Event):
+    _transaction = None
+
     @property
     def transaction(self):
         if self.type != 'http':
             return None
-        return Http(self)
+        if self._transaction is None:
+            self._transaction = Http(self)
+        return self._transaction
 
 
 class EventsHoseHttp(EventsHose):
@@ -57,6 +61,8 @@ class HttpRequest(object):
 
     @property
     def json(self):
+        if self.body == '':
+            return None
         return json.loads(self.body)
 
 
@@ -68,6 +74,7 @@ class HttpResponse(object):
         self.body = "".join(resp._body)
         self.raw = raw
         self.code = resp.get_status_code()
+        self._json = None
 
     def __repr__(self):
         return u"<Response %i>" % self.code
