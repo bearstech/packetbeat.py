@@ -14,9 +14,9 @@ def redis_factory(ctx):
 
 
 @click.group()
-@click.option('--host', default='localhost', help='Redis host.')
-@click.option('--port', default=6379, help='Redis port.')
-@click.option('--db', default=0, help='Redis db.')
+@click.option('-h', '--host', default='localhost', help='Redis host.')
+@click.option('-p', '--port', default=6379, help='Redis port.')
+@click.option('-d', '--db', default=0, help='Redis db.')
 @click.pass_context
 def packetbeat(ctx, host, port, db):
     ctx.obj['HOST'] = host
@@ -47,7 +47,7 @@ def channels(ctx):
 
 
 @packetbeat.command(help="Watch events on a channel.")
-@click.option('--channel', default='packetbeat/*', help="Pick a channel, or a pattern.")
+@click.option('-c', '--channel', default='packetbeat/*', help="Pick a channel, or a pattern.")
 @click.pass_context
 def watch(ctx, channel):
     hose = EventsHoseElasticsearch(redis_factory(ctx), channel)
@@ -57,7 +57,7 @@ def watch(ctx, channel):
 
 
 @packetbeat.command(help="Watch search speed on a channel.")
-@click.option('--channel', default='packetbeat/*', help="Pick a channel, or a pattern.")
+@click.option('-c', '--channel', default='packetbeat/*', help="Pick a channel, or a pattern.")
 @click.pass_context
 def search_stats(ctx, channel):
     hose = EventsHoseElasticsearch(redis_factory(ctx), channel)
