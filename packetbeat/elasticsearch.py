@@ -16,12 +16,12 @@ class EventElasticsearch(EventHttp):
 
     @property
     def api(self):
-        if len(self.http.request.slug) == 0:
+        if len(self.transaction.request.slug) == 0:
             return 'root'
-        first = self.http.request.slug[0]
+        first = self.transaction.request.slug[0]
         if first.startswith('_'):
             return first[1:]
-        last = self.http.request.slug[-1]
+        last = self.transaction.request.slug[-1]
         if last.startswith('_'):
             return last[1:]
         return 'index'
@@ -50,9 +50,10 @@ if __name__ == '__main__':
     r = redis.StrictRedis(host=sys.argv[1], port=6379, db=0)
     hose = EventsHoseElasticsearch(r)
     for event in hose:
-        print event.api, event.http.request.method, event.http.request.path
+        print "\n", event.api, event.transaction.request.method, event.transaction.request.path
         if event.api == 'bulk':
-            for action in bulk_request(event):
-                print "\t", action
-
-            print "\t", event.http.response.json
+            for action in event.bulk:
+                print "\t>", action
+        else:
+            print "\t>", event.transaction.request.json
+        print "\t<", event.transaction.response.json
