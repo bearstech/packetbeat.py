@@ -55,6 +55,9 @@ class Event(object):
         self.type = raw['type']
         self.notes = raw.get('notes', None)
 
+    def __repr__(self):
+        return "<Event %s %s>" % (self.client_server, self.type)
+
 
 class EventsHose(object):
     event = Event
