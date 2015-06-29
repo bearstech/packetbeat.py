@@ -9,10 +9,10 @@ Packetbeat events are Elasticsearch actions.
 class EventElasticsearch(EventHttp):
 
     @property
-    def bluk(self):
-        if self.http.request.path == '/_bulk':
-            pass
-        return None
+    def bulk(self):
+        if self.api != 'bulk':
+            return None
+        return bulk_request(self.transaction)
 
     @property
     def api(self):
@@ -27,9 +27,9 @@ class EventElasticsearch(EventHttp):
         return 'index'
 
 
-def bulk_request(event):
+def bulk_request(transaction):
     action = None
-    for line in event.http.request.body.split('\n')[:-1]:
+    for line in transaction.request.body.split('\n')[:-1]:
         if action is None:
             action = json.loads(line).items()[0]
             if action[0] not in {'index', 'create'}:
