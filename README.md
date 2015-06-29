@@ -9,26 +9,27 @@ Packetbeat
 
 Your packetbeat agents have to use redis channel output
 
-    [output]
-      [output.redis]
-      # Uncomment out this option if you want to output to Redis.
-      enabled = true
-      # Choose a name to avoid mess
-      index = "packetbeat/sponge-bob"
+    ```YAML
+    protocols:
+      http:
+        ports: [9200]
+        send_request: true
+        send_response: true
+        include_body_for: ["application/json", "text/plain"]
 
-      # Use pubsub communication
-      dataType = "channel"
-      db = 0
-
-      # Set the host and port where to find Redis.
-      host = "my-redis-broker"
-      port = 6379
-
-    [protocols]
-      [protocols.http]
-        # I want to watch Elasticsearch usage
-        ports = [9200]
-
+    output:
+      redis:
+        enabled: true
+        # Set the host and port where to find Redis.
+        host: my_redis_broker
+        port: 6379
+        save_topology: true
+        db: 0
+        # Choose a name to avoid mess
+        index: "packetbeat/sponge-bob"
+        # Use pubsub communication
+        datatype: channel
+    ```
 
 Client
 ------
