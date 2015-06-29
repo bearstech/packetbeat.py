@@ -1,4 +1,3 @@
 redis
-requests
 click
 http_parser
