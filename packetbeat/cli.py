@@ -52,8 +52,25 @@ def channels(ctx):
 def watch(ctx, channel):
     hose = EventsHoseElasticsearch(redis_factory(ctx), channel)
     for event in hose:
-        print(u"%s %s %s" % (event.api, event.http.request.method,
-                             event.http.request.path))
+        print(u"%s %s %s" % (event.api, event.transaction.request.method,
+                             event.transaction.request.path))
+
+
+@packetbeat.command(help="Watch search speed on a channel.")
+@click.option('--channel', default='packetbeat/*', help="Pick a channel, or a pattern.")
+@click.pass_context
+def search_stats(ctx, channel):
+    hose = EventsHoseElasticsearch(redis_factory(ctx), channel)
+    for event in hose:
+        if event.api == 'search':
+            r = event.transaction.response.json
+            print(u"%s %i ms took: %i shards.total: %i shards.failed: %i \
+hits.total: %i" % (event.transaction.request.path,
+                   event.responsetime, r['took'],
+                   r['_shards']['total'],
+                   r['_shards']['failed'],
+                   r['hits']['total']))
+
 
 if __name__ == '__main__':
     packetbeat(obj={})
