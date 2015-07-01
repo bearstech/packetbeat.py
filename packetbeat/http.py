@@ -50,7 +50,7 @@ class HttpRequest(object):
         req = HttpParser()
         req.execute(raw.request, len(raw.request))
         self.headers = req.get_headers()
-        self.body = "".join(req._body)
+        self.body = b"".join(req._body)
         self.url = req.get_url()
         self.path = req.get_path()
         self.method = req.get_method()
