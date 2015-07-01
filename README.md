@@ -1,13 +1,16 @@
 PacketBeat client
 =================
 
-Packetbeat steal packets and rebuild protocol for later analysis.
-The main target is Logstash-Elasticsearch-Kibana, but you can refine event and analyzing its.
+Packetbeat steal packets and rebuild protocol for later analysis. It's called DPI.
+The main target is Logstash-Elasticsearch-Kibana, but you can refine events and analyzing them.
+
+Packetbeat.py is a client for packetbeat events.
 
 Packetbeat
 ----------
 
-Your packetbeat agents have to use redis channel output
+Your packetbeat agent has to use redis channel output.
+In this example, the target is Elasticsearch exchanges.
 
 ```YAML
 protocols:
