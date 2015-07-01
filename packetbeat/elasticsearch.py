@@ -10,7 +10,7 @@ class EventElasticsearch(EventHttp):
 
     @property
     def bulk(self):
-        if self.api != 'bulk':
+        if self.api not in ['bulk', 'msearch']:
             return None
         return bulk_request(self.transaction)
 
