@@ -53,8 +53,14 @@ def channels(ctx):
 def watch(ctx, channel):
     hose = EventsHoseElasticsearch(redis_factory(ctx), channel)
     for event in hose:
-        print(u"%s %s %s" % (event.api, event.transaction.request.method,
-                             event.transaction.request.path))
+        print(u"{clientserver} {api} {method} \
+{took}ms {path} [{ua}]".format(clientserver=event.client_server,
+                      api=event.api,
+                      method= event.transaction.request.method,
+                      took=event.responsetime,
+                      path=event.transaction.request.path,
+                      ua=event.transaction.request.headers.get('user-agent',
+                                                               'Unknown').split('/')[0]))
 
 
 @packetbeat.command(help="Watch search speed on a channel.")
