@@ -39,6 +39,7 @@ def bulk_request(transaction):
             yield action[0], action[1], line
             action = None
 
+
 class EventsHoseElasticsearch(EventsHoseHttp):
     event = EventElasticsearch
 
@@ -50,8 +51,12 @@ if __name__ == '__main__':
     r = redis.StrictRedis(host=sys.argv[1], port=6379, db=0)
     hose = EventsHoseElasticsearch(r)
     for event in hose:
-        print "\n", event.api, event.transaction.request.method, event.transaction.request.path
-        if event.api == 'bulk':
+        print "\n {0} {1} {2} {3}ms [{4}]".format(event.api,
+                                                  event.transaction.request.method,
+                                                  event.transaction.request.path,
+                                                  event.responsetime,
+                                                  event.transaction.request.headers.get('user-agent', 'Unknown'))
+        if event.api in ['bulk', 'msearch']:
             for action in event.bulk:
                 print "\t>", action
         else:
