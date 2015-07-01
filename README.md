@@ -34,11 +34,13 @@ Your packetbeat agents have to use redis channel output
 Client
 ------
 
-This project provides an API, not a CLI. Python 2.7 and Pypy are supported.
+Python 2.7 and Pypy are supported.
+
+This project is a library, with a CLI.
 
 Just try :
 
-    python packetbat/elasticsearch.py my-redis-broker
+    python packetbat/cli.py --help
 
 
 Licence
