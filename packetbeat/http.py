@@ -40,7 +40,8 @@ class Http(object):
         self.response = HttpResponse(raw)
 
     def __repr__(self):
-        return "<Http %s %s>" % (repr(self.request), repr(self.response))
+        return "<Http %s %s %s>" % (self.raw.client_server, repr(self.request),
+                                    repr(self.response))
 
 
 class HttpRequest(object):
