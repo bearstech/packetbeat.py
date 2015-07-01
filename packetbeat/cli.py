@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 import time
+import re
 
 import click
 import redis
 
 from elasticsearch import EventsHoseElasticsearch
 
+
+UA_SPLIT = re.compile('[/ ]')
 
 def redis_factory(ctx):
     return redis.StrictRedis(host=ctx.obj['HOST'],
@@ -59,8 +62,9 @@ def watch(ctx, channel):
                       method= event.transaction.request.method,
                       took=event.responsetime,
                       path=event.transaction.request.path,
-                      ua=event.transaction.request.headers.get('user-agent',
-                                                               'Unknown').split('/')[0]))
+                      ua=UA_SPLIT.split(event.transaction.\
+                                        request.headers.get('user-agent',
+                                                            'Unknown'))[0]))
 
 
 @packetbeat.command(help="Watch search speed on a channel.")
