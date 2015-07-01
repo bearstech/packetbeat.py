@@ -72,5 +72,20 @@ hits.total: %i" % (event.transaction.request.path,
                    r['hits']['total']))
 
 
+@packetbeat.command(help="Watch search speed on a channel.")
+@click.option('-c', '--channel', default='packetbeat/*', help="Pick a channel, or a pattern.")
+@click.pass_context
+def bulk_stats(ctx, channel):
+    hose = EventsHoseElasticsearch(redis_factory(ctx), channel)
+    for event in hose:
+        if event.api == 'bulk':
+            r = event.transaction.response.json
+            size = len(r['items'])
+            print("{clientserver} {took} ms size:{size} \
+errors:{errors}".format(clientserver=event.client_server,
+                        took=r['took'],
+                        size=size,
+                        errors=r['errors']))
+
 if __name__ == '__main__':
     packetbeat(obj={})
