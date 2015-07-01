@@ -47,7 +47,8 @@ def channels(ctx):
 
 
 @packetbeat.command(help="Watch events on a channel.")
-@click.option('-c', '--channel', default='packetbeat/*', help="Pick a channel, or a pattern.")
+@click.option('-c', '--channel', default='packetbeat/*',
+              help="Pick a channel, or a pattern.")
 @click.pass_context
 def watch(ctx, channel):
     hose = EventsHoseElasticsearch(redis_factory(ctx), channel)
@@ -57,7 +58,8 @@ def watch(ctx, channel):
 
 
 @packetbeat.command(help="Watch search speed on a channel.")
-@click.option('-c', '--channel', default='packetbeat/*', help="Pick a channel, or a pattern.")
+@click.option('-c', '--channel', default='packetbeat/*',
+              help="Pick a channel, or a pattern.")
 @click.pass_context
 def search_stats(ctx, channel):
     hose = EventsHoseElasticsearch(redis_factory(ctx), channel)
@@ -73,7 +75,8 @@ hits.total: %i" % (event.transaction.request.path,
 
 
 @packetbeat.command(help="Watch search speed on a channel.")
-@click.option('-c', '--channel', default='packetbeat/*', help="Pick a channel, or a pattern.")
+@click.option('-c', '--channel', default='packetbeat/*',
+              help="Pick a channel, or a pattern.")
 @click.pass_context
 def bulk_stats(ctx, channel):
     hose = EventsHoseElasticsearch(redis_factory(ctx), channel)
