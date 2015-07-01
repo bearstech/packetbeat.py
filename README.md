@@ -9,27 +9,27 @@ Packetbeat
 
 Your packetbeat agents have to use redis channel output
 
-    ```YAML
-    protocols:
-      http:
-        ports: [9200]
-        send_request: true
-        send_response: true
-        include_body_for: ["application/json", "text/plain"]
+```YAML
+protocols:
+    http:
+    ports: [9200]
+    send_request: true
+    send_response: true
+    include_body_for: ["application/json", "text/plain"]
 
-    output:
-      redis:
-        enabled: true
-        # Set the host and port where to find Redis.
-        host: my_redis_broker
-        port: 6379
-        save_topology: true
-        db: 0
-        # Choose a name to avoid mess
-        index: "packetbeat/sponge-bob"
-        # Use pubsub communication
-        datatype: channel
-    ```
+output:
+    redis:
+    enabled: true
+    # Set the host and port where to find Redis.
+    host: my_redis_broker
+    port: 6379
+    save_topology: true
+    db: 0
+    # Choose a name to avoid mess
+    index: "packetbeat/sponge-bob"
+    # Use pubsub communication
+    datatype: channel
+```
 
 Client
 ------
